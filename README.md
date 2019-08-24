@@ -18,7 +18,7 @@ In the workflow below, I refer to the [techincal manual](http://www.josephholler
 * [Notes](#notes)
 
 
-## Step 1: Obtain Remote Sensing Data
+## [Step 1: Obtain Remote Sensing Data](#obtain-remote-sensing-data)
 Detailed instructions are in Lab Five in the course manual. Summary:
 * Save a kml file of the area of interest and load it in Earthdata to look for images (spatial filter).
 * To find appropriate tiles in Earthdata, apply collection filter (landsat) and temporal filter (years of interest). To further refine the area of interest, apply a spatial filter by grid code derived from a relevant Landsat tile.
@@ -29,7 +29,7 @@ Detailed instructions are in Lab Five in the course manual. Summary:
 ## Step 2: Write up Metadata for Granules
 * Use tips from Lab 4 and end of Lab 5 for metadata format.
 
-## Step 3: Correct the Images
+## Step 3: Correct the Images 
 
 ### Landsat 8
 These steps are outlined in Lab 7.
