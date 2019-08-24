@@ -1,0 +1,77 @@
+* For more documentation, refer to Appendix A of research paper.
+
+SELECT district, srid(geom), AsText(geom)
+FROM pop2008_aoi
+
+* Generate centroid of 1998 enumeration areas and spatial join to 2008 enumeration areas
+* just to visualize:
+SELECT id, AsText(PointOnSurface(geom)) AS pointText, district FROM pop1998
+
+CREATE TABLE pop1998_pos AS
+SELECT pop1998_total.id AS id, PointOnSurface(pop1998_total.geom) AS geom,
+pop1998_total.district AS district, pop1998_total.ta AS ta,
+pop1998_total.area as areaCheck, pop1998_total.total AS total_popu
+FROM pop1998_total
+JOIN pop2008_aoi
+ON Within(PointOnSurface(pop1998_total.geom), pop2008_aoi.geom)
+SELECT RecoverGeometryColumn ('pop1998_pos', 'geom', 4326, 'POINT')
+*Then vector -> geoprocessing -> intersection. So now it's a table. 
+* pop1998_new2 is the result of the intersect between pop2008_aoi and pop1998_pos
+
+*Aggregate population by district
+select DISTRICT, sum(total_popu_2)
+from pop1998_new2
+group by DISTRICT
+
+* There were some duplicated entries in mzuzu, checked others but they were fine
+select sum(mzuzu_popu), sum(areacheck)
+from mzuzu_unique
+* Join 1998 and 2008
+create table mwPop2 as
+select pop2008_aoi.id as id, geom, pop2008_aoi.district as district,
+pop2008_aoi.total_popu as pop2008, pop2008_aoi.popdensity as density2008_check,
+tojoin_1998.pop1998 as pop1998
+FROM pop2008_aoi
+JOIN tojoin_1998 on
+pop2008_aoi.district LIKE tojoin_1998.DISTRICT
+
+SELECT RecoverGeometryColumn ('mwPop2', 'geom', 4326, 'MULTIPOLYGON')
+
+* Now custom projection and area calculation
+insert into spatial_ref_sys values(110004, 'gg328', 110004, 'Malawi Transverse Mercator'
+  , '+proj=tmerc +lat_0=-13.24498 +lon_0=34.295 +k=0.999738 +x_0=800000 +y_0=800000 +datum=WGS84 +units=m +no_defs'
+  , 'Undefined')
+
+* copy over my table
+create table mwPopProj as
+select *
+from mwPop2
+
+SELECT RecoverGeometryColumn ('mwPopProj', 'geom', 4326, 'MULTIPOLYGON')
+
+* srid is in the system
+select *
+from spatial_ref_sys
+where srid = 110004
+
+* Set the projection
+select discardgeometrycolumn('mwPopProj', 'geom')
+update mwPopProj set geom = transform(geom, 110004)
+select recovergeometrycolumn('mwPopProj', 'geom', 110004, 'MULTIPOLYGON')
+
+* calculate ellipsoidal and planar area
+alter table mwPopProj add column areaEllip real
+update mwPopProj set areaEllip = Area(geom, 1)/1000000
+
+alter table mwPopProj add column areaPlanar real
+update mwPopProj set areaPlanar = Area(geom)/1000000
+
+* Calculate values
+alter table mwPopChange add column density2008 float
+update mwPopChange set density2008 = pop2008/areaPlanar
+
+alter table mwPopChange add column density1998 float
+update mwPopChange set density1998 = pop1998/areaPlanar
+
+alter table mwPopChange add column popChange float
+update mwPopChange set popChange = 10.0 * (pop2008-pop1998)/pop1998

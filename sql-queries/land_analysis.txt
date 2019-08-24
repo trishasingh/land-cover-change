@@ -1,0 +1,33 @@
+* For more documentation, refer to Appendix B of research paper.
+
+*Add agricultural data
+create table agrLand as
+select *
+FROM mwPopProj
+JOIN agrTable2008 on
+mwPopProj.id LIKE agrTable2008.id
+
+alter table agrLand3 add column agr2008 float
+update agrLand3 set agr2008 = 900.0 *(remainAgr + newAgr)/1000000
+
+alter table agrLand3 add column agr1998 float
+update agrLand3 set agr1998 = 900.0 *(remainAgr + lossAgr)/1000000
+
+alter table agrLand3 add column agrPerc2008 float
+update agrLand3 set agrPerc2008 = 100.0 * agr2008/areaPlanar
+
+alter table agrLand3 add column agrPerc1998 float
+update agrLand3 set agrPerc1998 = 100.0 * agr1998/areaPlanar
+
+alter table agrLand3 add column agrChange float
+update agrLand3 set agrChange = 10.0 * (agr2008 - agr1998)/ ifnull(agr1998, 1)
+
+alter table agrLand3 add column agrDensity2008 float
+update agrLand3 set agrDensity2008 = pop2008 / agr2008
+
+alter table agrLand3 add column agrDensity1998 float
+update agrLand3 set agrDensity1998 = pop1998 / agr1998
+
+alter table agrLand3 add column agrDensityChange float
+update agrLand3 set agrDensityChange = 10.0 * (agrDensity2008 - agrDensity1998)/ ifnull(agrDensity1998, 1)
+
