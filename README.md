@@ -18,7 +18,7 @@ In the workflow below, I refer to the [techincal manual](http://www.josephholler
 * [Notes](#notes)
 
 
-## Obtain Remote Sensing Data]
+## Obtain Remote Sensing Data
 Detailed instructions are in Lab Five in the course manual. Summary:
 * Save a kml file of the area of interest and load it in Earthdata to look for images (spatial filter).
 * To find appropriate tiles in Earthdata, apply collection filter (landsat) and temporal filter (years of interest). To further refine the area of interest, apply a spatial filter by grid code derived from a relevant Landsat tile.
@@ -26,10 +26,10 @@ Detailed instructions are in Lab Five in the course manual. Summary:
 * Uncompress .tar.gz files.
 * Note: Remember that most Landsat images will require patching, so download more than one granule.
 
-## Step 2: Write up Metadata for Granules
+## Write up Metadata for Granules
 * Use tips from Lab 4 and end of Lab 5 for metadata format.
 
-## Step 3: Correct the Images 
+## Correct the Images 
 
 ### Landsat 8
 These steps are outlined in Lab 7.
@@ -89,7 +89,7 @@ Requires the following: concatenate band images, optical calibration, and manage
   * Create data mask (=1 if value in both images, 0 if no data in either image). Use Miscellaneous -> Band Math tool and expression <im1b1 && im1b2 && im1b3 && im1b4 && im1b5 && im2b1 && im2b2 && im2b3 && im2b4 && im2b5>.
   * Apply this mask to trim images. Use Conversion -> ManageNoData tool -> Apply a mask as no data.
 
-## Step 4: Unsupervised Classification 
+## Unsupervised Classification 
 * Use SAGA and trimmed images from previous step.
 * Tools -> Imagery -> Classification -> K-Means Clustering for Grids. (L8i_KMeans)
 * Can add NDVI layer to grids, parameters: combined method, 18 clusters, 20 iterations.
@@ -100,7 +100,7 @@ Requires the following: concatenate band images, optical calibration, and manage
   * [Only do this if more than 2 classes] Reclassify again to make boolean mask. Grid -> Tools -> Reclassify Grid Values tool to make everything greater than or equal to 1 into 1 (Thus clouds become 0). (L9c_MaskInRasterAndVector)
   * Convert SAGA grid to polygon to use in QGIS. Shapes -> Grid Tools -> Vectorizing Grid Classes. 
 
-## Step 5: Create Training Areas for Supervised Classification
+## Create Training Areas for Supervised Classification
 * Can do this in QGIS.
 * Load mask into Q and export biggest polygon as kml to view in Google Earth.
 * Make polygons for training classes. ( L9d_DigitizeTrainingAreas)
@@ -108,14 +108,14 @@ Requires the following: concatenate band images, optical calibration, and manage
 * Toggle edit the layer and add polygons for important or left out classes.
 * Can load this training areas layer in SAGA and refine or add polygons based on kmeans classes. ( L9f_SupervisedClassification)
 
-## Step 6: Supervised Classification
+## Supervised Classification
 * Use SAGA for this step.
 * Load the latest image in SAGA and use the training layer as a parameter in Imagery -> Classification -> Supervised Classification for Grids. (L9f_SupervisedClassification, 2:45 onwards) 
 * Combine any classes if needed with the excel sheet based reclassification method outlined above. (L9i_ReclassifyMajorityFilter)
 * Run majority filter to remove noise. (L9i_ReclassifyMajorityFilter, 6:45 onwards)
 * Save all files.
 
-## Step 7: Assess Accuracy of Land Cover Classification
+## Assess Accuracy of Land Cover Classification
 * Can do this through cross-tabulation by selecting random points and checking if they match with the actual imagery.
 * In SAGA, use Grid -> Tools -> Resampling to simplify the grid so you can create polygons for ground truthing. (L10a_Resampling)
 * To reduce processing time, run this grid through a majority filter. (L10c_RandomPoints)
@@ -129,13 +129,13 @@ Requires the following: concatenate band images, optical calibration, and manage
 * Summary table provides the kappa statistic and overall accuracy.
 * Use these tables to refine classification.
 
-## Step 8: Detect Land Change
+## Detect Land Change
 * Continue in SAGA and use the same confusion table tool as before: Imagery -> Classification -> Confusion Matrix (two grids). Classification 1 should be the older image and classification 2 should be the newer image, output as area (most probably output is in sq metres). (L10g_ChangeDetection)
 * Load combination layer and look at legend to qualitatively identify at the change in land use.
 * In the confusion table, rows represent the earlier year and columns represent the newer year.
 * Suggested: Save change table and reclassify using excel method to reduce number of fields.
 
-## Step 9: Summarize Change by Polygons
+## Summarize Change by Polygons
 * Export polygon from QGIS as a shapefile in the projection system of the raster. Load it in SAGA so that it overlaps with the t1 to t2 combination layer.
 * Convert this shapefile to a grid. Grid -> Gridding -> Shapes to grid tool.
 * Now cross-tabulate roaster districts with land cover change.
